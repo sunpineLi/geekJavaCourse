@@ -16,11 +16,35 @@ JDK8可指定的垃圾收集器(如果使用不支持的GC组合，会启动失�
 > 5. -XX:+UseConcMarkSweepGC -XX:+UseParNewGC (等价-XX:+UseConcMarkSweepGC)
 > 6. -XX:+UseG1GC
 ### 2.1 UseSerialGC
-> 串行回收，执行效率低    
+> 年轻代使用 mark-copy算法，对老年代使用 mark-sweep-compact算法。\
+> 单线程，不能进行并行处理，执行效率低，只适合几百MB堆内存的JVM，而且是单核CPU时比较有用
 ### 2.2 UseParallelGC
-> 并行回收，执行效率高
+> 年轻代使用 mark-copy算法，对老年代使用 mark-sweep-compact算法。\
+> 两者在执行 标记和 复制/整理 阶段时都使用多个线程, 减少GC时间\
+> 适用于多核服务器，主要目标是增加吞吐量，容易出现长时间的卡顿（FullGC）
 ### 2.3 UseConcMarkSweepGC
-> 6个阶段 (待补充)
+> 对年轻代采用并行STW方式的 mark-copy 算法 ，对老年代主要使用并发 mark-sweep 算法 \
+> 设计目标是避免在老年代垃圾收集时出现长时间的卡顿 \
+> 在 mark-and-sweep (标记-清除) 阶段的大部分工作和应用线程一起并发执行。
+> 不对老年代进行整理，而是使用空闲列表(free-lists)来管理内存空间的回收 (老年代内存碎片问题) \
+> 不可预测的暂停时间，特别是堆内存较大的情况下 \
+
+> 6个阶段(针对老年代) \
+> 阶段 1: Initial Mark(初始标记, STW) \
+> 标记所有的根对象，根对象直接引用的对象，被年轻代中存活对象所引用的对象 \
+> 阶段 2: Concurrent Mark(并发标记) \
+> 遍历老年代，标记所有的存活对象，从前一阶段 “Initial Mark” 找到的根对象开始算起。（对象引用关系在变化） \
+> 阶段 3: Concurrent Preclean(并发预清理)
+> 通过“ Card（卡片）”的方式将发生了改变的区域标记为“脏”区，这些脏对象会被统计出来，他们所引用的对象也会被标记 \
+> 阶段 4: Concurrent Abortable Preclean(可取消的并发预清理) \
+> 尝试在 STW 的 Final Remark阶段 之前尽可能地多做一些工作 \
+> 阶段 5: Final Remark(最终标记 STW) \
+> 完成老年代中所有存活对象的标记\
+> 阶段 6: Concurrent Sweep(并发清除)\
+> 删除不再使用的对象, 回收空间\
+> 阶段 7: Concurrent Reset(并发重置)
+> 重置CMS算法相关的内部数据，为下一次GC循环做准备。
+
 ### 2.4 UseG1GC
-> 防止FullGC导致退化成串行化影响效率\
+> 防止FullGC导致退化成串行化影响效率 \
 > 原则上不能指定G1垃圾收集器的年轻代大小,因为G1的回收方式是小批量划定区块（region）进行。
