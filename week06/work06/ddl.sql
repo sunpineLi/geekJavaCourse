@@ -1,0 +1,32 @@
+CREATE DATABASE IF NOT EXISTS geekdb;
+
+USE geekdb;
+
+CREATE TABLE IF NOT EXISTS t_user
+(
+userid INT(11) NOT NULL COMMENT '用户ID',
+username VARCHAR(20) NOT NULL COMMENT '用户名',
+password VARCHAR(20) COMMENT '密码',
+nickname VARCHAR(20) COMMENT '昵称',
+idcard VARCHAR(20) COMMENT '身份证',
+PRIMARY KEY (userid)
+);
+
+CREATE TABLE IF NOT EXISTS t_order
+(
+userid INT(11) NOT NULL COMMENT '用户ID',
+orderid INT(20) NOT NULL COMMENT '订单ID',
+mount INT(20) COMMENT '金额',
+details VARCHAR(200) COMMENT '订单详情',
+status VARCHAR(20) COMMENT '状态',
+PRIMARY KEY (orderid)
+);
+
+CREATE TABLE IF NOT EXISTS t_goods
+(
+code INT(11) NOT NULL COMMENT '商品编码',
+name VARCHAR(20) NOT NULL COMMENT '商品名称',
+category VARCHAR(20) COMMENT '分类',
+weight VARCHAR(200) COMMENT '重量',
+PRIMARY KEY (code)
+);
